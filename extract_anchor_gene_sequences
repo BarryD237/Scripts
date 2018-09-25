@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+#####################################################################
+# Python script to extract "anchor gene" sequences from genbank file:
+#####################################################################
+
+from Bio import SeqIO
+import sys
+
+
+#Open list of gene IDs
+with open('all_anchor_genes.txt') as temp_file:
+    genes = [line.rstrip('\n') for line in temp_file]
+    
+#Function for printing sequence
+def printFasta(seq):
+    """printFasta in a nice way with \n after 80 characters"""
+    line_length = 80
+    newseq = ''
+    count = 0
+    for i in seq:
+        if count == line_length:
+            newseq += "\n"
+            count = 0
+        newseq += i
+        count += 1
+    return newseq
+
+# For loop
+with open(sys.argv[2], 'w') as nfh:
+        for seq_record in SeqIO.parse(sys.argv[1], "genbank"):
+            for feat in seq_record.features:
+                if feat.type == "CDS":
+                    for gene in genes:
+                        if gene in feat.qualifiers['gene_id']:
+                            seq = feat.qualifiers['translation']
+                            sequence = printFasta(seq)
+                            nfh.write(">%s\n%s\n" % (gene, sequence))
+                            
