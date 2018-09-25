@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
-#####################################################################
+######################################################################
 # Python script to extract "anchor gene" sequences from genbank file:
+#
+# Usage python extract_anchor_gene_sequences.py INFILE.gbk OUTFILE.faa
+#
+# Might have been python .py .gbk ${file}.faa
 #####################################################################
 
 from Bio import SeqIO
