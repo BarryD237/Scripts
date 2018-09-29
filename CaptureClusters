@@ -1,0 +1,51 @@
+This Script can Capture Gene Clusters given a tab seperated txt file:
+
+Cluster_name "\t" First Gene_id in Cluster "\t" Last Gene_id in Cluster "\t"
+
+This file was manually generated.. script to pull out Start/End doable, not so sure about Cluster_name
+
+import pandas as pd 
+from Bio import SeqIO
+from Bio import SeqFeature
+
+df = pd.read_csv('27SEPTtest.txt', sep='\t', names=['Cluster', 'Start', 'Stop'])
+start_gene = df["Start"].tolist()
+print(start_gene)
+end_gene = df["Stop"].tolist()
+print(end_gene)
+cluster_name = df["Cluster"].tolist()
+print(cluster_name)
+
+gbk = "antiSMASH.gbk"
+record = next(SeqIO.parse("antiSMASH.gbk", "genbank"))
+
+for x, y, z in zip(start_gene, end_gene, cluster_name):
+    print(x,y,z)
+    for seq_record in SeqIO.parse(gbk, "genbank"):
+        for feat in seq_record.features:
+            if feat.type == "CDS":
+                if x in feat.qualifiers["gene_id"]:
+                    print(x)
+                    
+                    cluster_start = feat.location.start
+                    
+                    print(cluster_start)
+                    
+                else:
+                        
+                    if y in feat.qualifiers["gene_id"]:
+                        
+                        cluster_end = feat.location.end
+                        
+                        print(cluster_end)
+                        
+                        subrecord = record[cluster_start:cluster_end]
+                        
+                        filename = "%s.gbk" % z
+                        SeqIO.write(subrecord, filename, "gb")
+                            
+                        
+  This file does not capture the correct genes. 
+  The unique filename writing does work, use this in future. 
+  Print statements show locations are correct, no idea why record[start:stop] not cooperating. 
+                        
