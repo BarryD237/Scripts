@@ -1,0 +1,84 @@
+Firstly a txt file must exist containing 
+Cluster name \t Start gene \t end gene
+where genes are Gene_id. 
+
+first script is a bash script to supply these vaeriable as input
+data for the python script to extract the gene range, and write
+output to a txt file that is a genbank. can change extension to
+.gbk afterwards. 
+
+###################
+ prompt_python.sh
+###################
+
+#!/bin/bash
+
+while read X Y Z; do
+
+        python ./New_slicer.py -i antiSMASH.gbk -r $Y:$Z -o $X
+
+done < cluster_start_end.txt
+
+
+###############
+ New_slicer.py 
+###############
+modified to include a "--outlife" argument. 
+
+#!/usr/bin/env python
+
+# Slice subregions out of a genbank between 2 genes.
+# Usage:
+#   slice_genes.py infile.gbk gene1:gene2:strand
+
+from Bio import SeqIO
+import sys, argparse
+
+def get_args():
+    """Parse command line arguments"""
+
+    try:
+        parser = argparse.ArgumentParser(
+            description='Subset genbanks between 2 genes.')
+        parser.add_argument('-i', '--infile', action='store',
+                            help='Input genbank file to slice.')
+        parser.add_argument('-r', '--range', action='store',
+                            help='The 2 gene GENE_ID to slice between')
+        parser.add_argument('-o', '--outfile', action='store',
+                           help='Name the outfile to write gbk file to')
+        if len(sys.argv) == 1:
+            parser.print_help(sys.stderr)
+            exit(1)
+    except:
+        sys.stderr.write("An exception occurred with argument parsing. Check your provided options.")
+
+    return parser.parse_args()
+
+
+def main():
+    args = get_args()
+    genes = args.range.split(':')
+    outfile_ = args.outfile
+    sys.stderr.write('Fetching subsequence betweeen {} and {}.\n'.format(genes[0], genes[1]))
+
+    records = SeqIO.parse(args.infile, 'genbank')
+
+    for record in records:
+        sys.stderr.write('Operating on {}.\n'.format(record.id))
+        loci = [feat for feat in record.features if feat.type == "CDS"]
+        try:
+            start = min([int(l.location.start) for l in loci if l.qualifiers['gene_id'][0] in genes])
+            end = max([int(l.location.end) for l in loci if l.qualifiers['gene_id'][0] in genes])
+        except ValueError:
+            sys.stderr.write('No indices returned for those loci, assume they don\'t feature in this record, moving on...\n.')
+            continue
+        try:
+            (start and end)
+            subrecord = record[start:end]
+            SeqIO.write(subrecord, outfile_, "gb")
+        except NameError:
+            sys.stderr.write('Didn\'t get any indices even though the genes seemed to match. Couldn\'t slice.\n')
+            pass
+
+if __name__ == '__main__':
+    main()
