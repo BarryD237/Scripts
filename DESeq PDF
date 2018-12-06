@@ -1,6 +1,10 @@
 Code to produce a 'catalog' of PDFs showing specific gene expression levels across 'condition'.
 Start with DESeq res(ults) object
 
+
+library(magrittr) -> allows %>% piping
+
+
 res <- results(dds, tidy=TRUE) %>%
   arrange(padj, pvalue) %>%
   tbl_df()
