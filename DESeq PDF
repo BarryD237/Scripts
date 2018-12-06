@@ -1,0 +1,30 @@
+Code to produce a 'catalog' of PDFs showing specific gene expression levels across 'condition'.
+Start with DESeq res(ults) object
+
+res <- results(dds, tidy=TRUE) %>%
+  arrange(padj, pvalue) %>%
+  tbl_df()
+res
+
+goi <- res$row[1:2]       # [1:2] only captures top 2 genes. Expand this to ~100
+stopifnot(all(goi %in% names(dds)))
+goi
+
+tcounts <- t(log2((counts(dds[goi, ], normalized=TRUE, replaced=FALSE)+.5))) %>% . # minimize pseudo count if you want
+  merge(colData(dds), ., by="row.names") %>%
+  gather(gene, expression, (ncol(.)-length(goi)+1):ncol(.))
+
+ggplot(tcounts, aes(condition, type, expression, fill=condition)) + 
+  geom_boxplot() + 
+  facet_wrap(~gene, scales="free_y") + 
+  labs(x="", 
+       y="Expression (log normalized counts)", 
+       fill="type", 
+       title="Top Gene Results")
+       
+       
+       
+       
+# condition was control vs treated
+# type is WT vs S2
+# If only contrasting one, leave out the other in aes(...)
