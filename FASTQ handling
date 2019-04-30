@@ -1,0 +1,9 @@
+#Extract reads of certain range. 
+
+awk 'BEGIN {FS = "\t" ; OFS = "\n"} \
+{header = $0 ; getline seq ; getline qheader ; getline qseq ; if (length(seq) >= 21 && length(seq) <= 25) \
+{print header, seq, qheader, qseq}}' < your.fastq > filtered.fastq
+
+#Zcat sequence.txt from people who did sequencing runs
+
+zcat file.txt.gz | bgzip -c > file.fastq.gz 
