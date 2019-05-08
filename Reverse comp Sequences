@@ -1,0 +1,26 @@
+reversing, or generating reverse compliment for sequences. 
+
+from Bio.Seq import Seq
+
+sequence = Seq("CTCGCCGAGTAGATCAC")
+
+Reverse Sequence 
+
+Rev_Seq = sequence[::-1]
+
+print(sequence)
+print(Rev_Seq)
+CTCGCCGAGTAGATCAC
+CACTAGATGAGCCGCTC
+
+Rev_complement = sequence.reverse_complement()
+print(sequence)
+print(Rev_complement)
+CTCGCCGAGTAGATCAC
+GTGATCTACTCGGCGAG
+
+or
+5'              3'
+CTCGCCGAGTAGATCAC
+GTGATCTACTCGGCGAG
+3'              5'
