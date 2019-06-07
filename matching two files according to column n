@@ -1,0 +1,5 @@
+awk 'FNR==NR{a[$3];next} (($3) in a)' Upk2_Regulated.csv Up_Regulated.csv > up.merge.csv
+
+returns matches in Upk2_Reg that are in Up_Reg and writes to merge, searching column 3 for matches.
+
+up_reg is the smaller file, testing matches against the larger file, upk2_reg
